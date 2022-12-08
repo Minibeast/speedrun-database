@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="navigator">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active" aria-current="page">Home</li>
+        </ol>
+    </nav>
+</div>
+
+{% for game in runs %}
+<div class="card home-card run-list category-list">
+    <h3 class="card-title"><a href="{% url 'speedrun_db:game' game.abv %}">{{ game.name }}</a></h3>
+    <div class="list-group list-group-flush">
+        {% for category in game.categories %}
+        <div class="list-group-item">
+            <h3><a href="{% url 'speedrun_db:category' game.abv category.abv %}">{{ category.name }}</a></h3>
+            {% for run in category.personal_best %}
+            <a href="{% url 'speedrun_db:run' run.url_id %}">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ run.timestring }}</h5>
+                    <small>{{ run.date }}</small>
+                </div>
+                {% if run.players %}
+                <p class="mb-1">Completed with: {{ run.players }}</p>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+{% endblock content %}

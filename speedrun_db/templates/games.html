@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="navigator">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:index' %}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Games</li>
+        </ol>
+    </nav>
+</div>
+
+{% for game in games %}
+<div class="card home-card run-list category-list">
+    <h3 class="card-title"><a href="{% url 'speedrun_db:game' game.abv %}">{{ game.name }}</a></h3>
+    <div class="list-group list-group-flush">
+        {% for category in game.categories %}
+        <div class="list-group-item">
+            <h3><a href="{% url 'speedrun_db:category' game.abv category.abv %}">{{ category.name }}</a></h3>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+{% endblock content %}

@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="navigator">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:index' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:game' runs.0.game_abv %}">{{ runs.0.game_name }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:category' runs.0.game_abv runs.0.category_abv %}">{{ runs.0.category_name }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:run' runs.0.url_id %}">{{ runs.0.timestring }} {% if runs.0.subcategory %}({{ runs.0.subcategory }}){% endif %}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:comparison_make' runs.0.url_id %}">Compare</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:run' runs.1.url_id %}">{{ runs.1.timestring }} {% if runs.1.subcategory %}({{ runs.1.subcategory }}){% endif %}</a></li>
+        </ol>
+    </nav>
+</div>
+
+<div class="card-group">
+    {% for run in runs %}
+    <div class="card run-card mx-auto">
+        {% for video in run.video %}
+        {% if video.type == "youtube" and run.splits and not run.use_game_time %}
+        <div class="container-video">
+            <div class="card-img-top video" id="{{ run.url_id }}"></div>
+        </div>
+        {% else %}
+        <div class="container-video">
+            <iframe class="card-img-top video" src="{{ video.url }}" height="562px" title="Video Player" frameborder="0" allowfullscreen></iframe>
+        </div>
+        {% endif %}
+        {% endfor %}
+        <div class="card-body">
+            <h5 class="card-title mb-1">{{ run.game_name }} - {{ run.category_name }} in {{ run.timestring }} {% if run.subcategory %}({{ run.subcategory }}){% endif %}</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Achieved on {{ run.date }}</li>
+            {% if run.players %}
+            <li class="list-group-item">Completed with: {{ run.players }}</li>
+            {% endif %}
+            {% if run.platform %}
+            <li class="list-group-item">Platform: {{ run.platform }}</li>
+            {% endif %}
+            {% if run.demos %}
+            <li class="list-group-item"><a href="{{ run.demos }}" class="card-link">Demos</a></li>
+            {% endif %}
+        </ul>
+        {% if run.splits %}
+        <table class="table">
+            <thead>
+                <th scope="col">Split</th>
+                <th>Segment Time</th>
+                <th>Time</th>
+            </thead>
+            <tbody>
+                {% if forloop.first %}
+                {% for split in splits_comparison %}
+                <tr>
+                    {% if run.yt_player_embed.exists and not run.use_game_time %}
+                    <th scope="row"><a href="#{{ run.url_id }}" onclick="seekTo({{ run.url_id }}, {{ split.split_info_1.last_seconds }} + {{ run.yt_player_embed.offset }});">{{ split.split_info_1.name }}</a></th>
+                    {% else %}
+                    <th>{{ split.split_info_1.name }}</th>
+                    {% endif %}
+                    {% if split.is_gold %}
+                    <th style="color: gold;">{{ split.split_info_1.segment_time }}</th>
+                    {% else %}
+                    <th>{{ split.split_info_1.segment_time }}</th>
+                    {% endif %}
+                    <th>{{ split.split_info_1.time }}</th>
+                </tr>
+                {% endfor %}
+                {% else %}
+                {% for split in splits_comparison %}
+                <tr>
+                    {% if run.yt_player_embed.exists and not run.use_game_time %}
+                    <th scope="row"><a href="#{{ run.url_id }}" onclick="seekTo({{ run.url_id }}, {{ split.split_info_2.last_seconds }} + {{ run.yt_player_embed.offset }});">{{ split.split_info_2.name }}</a></th>
+                    {% else %}
+                    <th>{{ split.split_info_2.name }}</th>
+                    {% endif %}
+                    {% if split.is_gold %}
+                    <th>{{ split.split_info_2.segment_time }}</th>
+                    {% else %}
+                    <th style="color: gold;">{{ split.split_info_2.segment_time }}</th>
+                    {% endif %}
+                    <th>{{ split.split_info_2.time }}</th>
+                </tr>
+                {% endfor %}
+                {% endif %}
+            </tbody>
+        </table>
+        <div class="card-body split-links">
+            <a href="{% url 'speedrun_db:splits' run.url_id %}" class="card-link">Download</a>
+            <a href="{% url 'speedrun_db:comparison_make' run.url_id %}" class="card-link">Create Comparison</a>
+        </div>      
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% if load_yt_js %}
+<script>
+    var tag = document.createElement('script');
+
+    tag.src = 'https://www.youtube.com/iframe_api'
+    var firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    {% for run in runs %}
+    {% if run.yt_player_embed.exists and run.splits and not run.use_game_time %}
+    var {{ run.url_id }};
+    {% endif %}
+    {% endfor %}
+    function onYouTubeIframeAPIReady() {
+        {% for run in runs %}
+        {% if run.yt_player_embed.exists and run.splits and not run.use_game_time %}
+        {{ run.url_id }} = new YT.Player('{{ run.url_id }}', {
+            height: '562',
+            videoId: '{{ run.yt_player_embed.video.id }}',
+            playerVars: {
+                'playsinline': 1,
+                'start': 0
+            },
+        });
+        {% endif %}
+        {% endfor %}
+    }
+
+    function seekTo(player, seconds) {
+        if (seconds < 0) seconds = 0;
+        player.seekTo(seconds);
+        player.playVideo();
+    }
+</script>
+{% endif %}
+{% endblock content %}

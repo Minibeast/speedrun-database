@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="navigator">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:index' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:game' data.game.abv %}">{{ data.game.name }}</a></li>
+            <li class="breadcrumb-item active">{{ data.category.name }}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="run-list">
+    <h1>Personal Best</h1>
+    <div class="list-group">
+        {% for run in data.personal_best %}
+        <a href="{% url 'speedrun_db:run' run.url_id %}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ run.timestring }}</h5>
+                <small>{{ run.date }}</small>
+            </div>
+            {% if run.subcategory %}
+            <p class="mb-1">Subcategory: {{ run.subcategory }}</p>
+            {% endif %}
+            {% if run.players %}
+            <p class="mb-1">Completed with: {{ run.players }}</p>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+</div>
+<br>
+<div class="run-list">
+    <h1>Run History</h1>
+    {% if data.category.filter %}
+    {% for subcategory, runs in data.run_history.items %}
+    <h4 class="subheader">{{ subcategory }}</h4>
+    <div class="list-group">
+        {% for run in runs %}
+        <a href="{% url 'speedrun_db:run' run.url_id %}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ run.timestring }}</h5>
+                <small>{{ run.date }}</small>
+            </div>
+            {% if run.players %}
+            <p class="mb-1">Completed with: {{ run.players }}</p>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="list-group">
+        {% for run in data.run_history %}
+        <a href="{% url 'speedrun_db:run' run.url_id %}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ run.timestring }}</h5>
+                <small>{{ run.date }}</small>
+            </div>
+            {% if run.players %}
+            <p class="mb-1">Completed with: {{ run.players }}</p>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

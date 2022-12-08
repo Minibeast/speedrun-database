@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="navigator">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:index' %}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">500</li>
+        </ol>
+    </nav>
+</div>
+
+<p>An error occurred completing that request.</p>
+
+{% endblock content %}

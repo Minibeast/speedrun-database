@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="navigator">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:index' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:game' run.game_abv %}">{{ run.game_name }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:category' run.game_abv run.category_abv %}">{{ run.category_name }}</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'speedrun_db:run' run.url_id %}">{{ run.timestring }} {% if run.subcategory %}({{ run.subcategory }}){% endif %}</a></li>
+            <li class="breadcrumb-item active">Compare</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="run-list">
+    <h1>Valid Comparisons</h1>
+    {% if category_filter %}
+    {% for subcategory, runs in run_history.items %}
+    <h4 class="subheader">{{ subcategory }}</h4>
+    <div class="list-group">
+        {% for hist_run in runs %}
+        <a href="{% url 'speedrun_db:comparison' run.url_id hist_run.url_id %}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ hist_run.timestring }}</h5>
+                <small>{{ hist_run.date }}</small>
+            </div>
+            {% if hist_run.players %}
+            <p class="mb-1">Completed with: {{ hist_run.players }}</p>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="list-group">
+        {% for hist_run in run_history %}
+        <a href="{% url 'speedrun_db:comparison' run.url_id hist_run.url_id %}" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ hist_run.timestring }}</h5>
+                <small>{{ hist_run.date }}</small>
+            </div>
+            {% if hist_run.players %}
+            <p class="mb-1">Completed with: {{ hist_run.players }}</p>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}
